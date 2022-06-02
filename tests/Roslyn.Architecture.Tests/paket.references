@@ -1,0 +1,7 @@
+SmartAnalyzers.RoslynTestKit
+Microsoft.NET.Test.Sdk
+Nunit
+NUnit3TestAdapter
+NUnit.Analyzers
+Microsoft.CodeAnalysis.Workspaces.MSBuild
+Microsoft.Build.Locator

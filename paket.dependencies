@@ -1,0 +1,12 @@
+source https://api.nuget.org/v3/index.json
+
+storage: none
+framework: net6.0, netstandard2.0
+nuget Microsoft.CodeAnalysis.CSharp.Workspaces
+nuget Microsoft.CodeAnalysis.Workspaces.MSBuild
+nuget Microsoft.NET.Test.Sdk
+nuget Nunit
+nuget NUnit.Analyzers
+nuget NUnit3TestAdapter
+nuget SmartAnalyzers.RoslynTestKit
+nuget Microsoft.Build.Locator
