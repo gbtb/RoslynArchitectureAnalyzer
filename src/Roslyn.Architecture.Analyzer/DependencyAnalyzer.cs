@@ -29,8 +29,13 @@ public class DependencyAnalyzer: DiagnosticAnalyzer
         foreach (var reference in ctx.Compilation.References.OfType<CompilationReference>())
         {
             var cannotBeReferencedAttrs = GetAssemblyAttributesFromCompilation(reference.Compilation);
-            
-            if (cannotBeReferencedAttrs.Any(attr => (string?) attr.ConstructorArguments[0].Value == ctx.Compilation.AssemblyName))
+
+            bool Predicate(AttributeData attr)
+            {
+                return !attr.ConstructorArguments.IsEmpty && (string?) attr.ConstructorArguments[0].Value == ctx.Compilation.AssemblyName;
+            }
+
+            if (cannotBeReferencedAttrs.Any(Predicate))
                 ctx.ReportDiagnostic(Diagnostic.Create(CannotReferenceDiagnostic, Location.None));
         }
     }
