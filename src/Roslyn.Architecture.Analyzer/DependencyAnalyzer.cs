@@ -7,6 +7,7 @@ using Roslyn.Architecture.Abstractions;
 [assembly:InternalsVisibleTo("Roslyn.Architecture.Tests")]
 namespace Roslyn.Architecture.Analyzer;
 
+[DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class DependencyAnalyzer: DiagnosticAnalyzer
 {
     private static readonly DiagnosticDescriptor CannotReferenceDiagnostic = new("RARCH1", "Cannot reference assembly",
@@ -26,38 +27,39 @@ public class DependencyAnalyzer: DiagnosticAnalyzer
 
     private void AnalyzeReferences(CompilationAnalysisContext ctx)
     {
-        SearchLoop(new SearchContext(ctx, ImmutableArray<string>.Empty.Add(ctx.Compilation.AssemblyName ?? string.Empty)), ctx.Compilation);
+        SearchLoop(new SearchContext(ctx, ImmutableList<string>.Empty.Add(ctx.Compilation.AssemblyName ?? string.Empty), 0), ctx.Compilation);
     }
 
-    private bool SearchLoop(SearchContext ctx, Compilation compilation)
+    private void SearchLoop(SearchContext ctx, Compilation compilation)
     {
+        if (ctx.Depth > 32) //protection from SO, just in case
+            return;
+        
         foreach (var reference in compilation.References.OfType<CompilationReference>())
         {
             var cannotBeReferencedAttrs = GetAssemblyAttributesFromCompilation(reference.Compilation);
 
             bool Predicate(AttributeData attr)
             {
-                return !attr.ConstructorArguments.IsEmpty && (string?) attr.ConstructorArguments[0].Value == ctx.ctx.Compilation.AssemblyName;
+                return !attr.ConstructorArguments.IsEmpty && (string?) attr.ConstructorArguments[0].Value == ctx.Ctx.Compilation.AssemblyName;
             }
 
             if (cannotBeReferencedAttrs.Any(Predicate))
             {
                 var assemblyName = reference.Compilation.AssemblyName ?? string.Empty;
-                ctx.ctx.ReportDiagnostic(Diagnostic.Create(CannotReferenceDiagnostic, Location.None, 
-                    ctx.ctx.Compilation.AssemblyName, reference.Compilation.AssemblyName,
-                    string.Join("->", ctx.referencesPath.Concat(new []{assemblyName}))
+                ctx.Ctx.ReportDiagnostic(Diagnostic.Create(CannotReferenceDiagnostic, Location.None, 
+                    ctx.Ctx.Compilation.AssemblyName, reference.Compilation.AssemblyName,
+                    string.Join("->", ctx.ReferencesPath.Concat(new []{assemblyName}))
                     ));
-                return true;
             }
         }
 
         foreach (var reference in compilation.References.OfType<CompilationReference>())
         {
-            if (SearchLoop(ctx with{ referencesPath = ctx.referencesPath.Add(reference.Compilation.AssemblyName ?? string.Empty)}, reference.Compilation))
-                return true;
+            SearchLoop(
+                ctx with {ReferencesPath = ctx.ReferencesPath.Add(reference.Compilation.AssemblyName ?? string.Empty), Depth = ctx.Depth + 1},
+                reference.Compilation);
         }
-
-        return false;
     }
 
     internal IEnumerable<AttributeData> GetAssemblyAttributesFromCompilation(Compilation referenceCompilation)
@@ -71,5 +73,5 @@ public class DependencyAnalyzer: DiagnosticAnalyzer
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; }
 
-    private record SearchContext(CompilationAnalysisContext ctx, ImmutableArray<string> referencesPath);
+    private record SearchContext(CompilationAnalysisContext Ctx, ImmutableList<string> ReferencesPath, int Depth);
 }

@@ -150,6 +150,63 @@ public class Tests: AnalyzerTestFixture
         Assert.That(diags[0].Id, Is.EqualTo("RARCH1"));
         Assert.That(diags[0].GetMessage(), Is.EqualTo("Assembly Main has a forbidden reference to assembly Lib. Reference chain: Main->Lib2->Lib."));
     }
+    
+    [Test]
+    public async Task Test_AnalyzerFindsMultipleViolations()
+    {
+        var workspace = new AdhocWorkspace();
+        var solution = workspace.AddSolution(SolutionInfo.Create(SolutionId.CreateNewId(), VersionStamp.Default));
+        var runtimeAssembly = Assembly.Load("System.Runtime");
+        var libProject = workspace.AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Default, "Lib", "Lib", LanguageNames.CSharp, 
+            metadataReferences: CreateFrameworkMetadataReferences().Concat(  
+                new []{ ReferenceSource.FromType<CannotBeReferencedByAttribute>(), 
+                    ReferenceSource.FromAssembly(runtimeAssembly) }))
+        );
+        var lib2Project = workspace.AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Default, "Lib2", "Lib2", LanguageNames.CSharp,
+            metadataReferences: CreateFrameworkMetadataReferences().Concat(  
+                new []{ ReferenceSource.FromType<CannotBeReferencedByAttribute>(), 
+                    ReferenceSource.FromAssembly(runtimeAssembly) }))
+            );
+        var mainProject = workspace.AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Default, "Main", "Main", LanguageNames.CSharp));
+
+        var sourceText = @"
+                using System;
+                using Roslyn.Architecture.Abstractions;
+
+                [assembly:CannotBeReferencedBy(""Main"")]
+                namespace Lib 
+                {
+                    public class Foo
+                    {
+                        public int Prop { get; set; }
+                    }
+                }
+            ";
+        
+        
+        var doc = workspace.AddDocument(libProject.Id, "Lib.cs", SourceText.From(sourceText));
+        libProject = doc.Project;
+        doc = workspace.AddDocument(lib2Project.Id, "Lib2.cs", SourceText.From(sourceText));
+        lib2Project = doc.Project;
+
+        var reference = new ProjectReference(libProject.Id);
+        solution = workspace.CurrentSolution.AddProjectReference(mainProject.Id, reference);
+        reference = new ProjectReference(lib2Project.Id);
+        solution = solution.AddProjectReference(mainProject.Id, reference);
+        var emptyDoc = solution.GetProject(mainProject.Id)?.AddDocument("Empty.cs", "");
+
+        workspace.WorkspaceFailed += (_, err) => Assert.Fail(err.ToString());
+        Assert.That(emptyDoc.Project.Solution.Projects.First().Documents.Count(), Is.EqualTo(1), "Expected solution structure hasn't been formed");
+
+        var compilation = await emptyDoc.Project.GetCompilationAsync();
+        var compilationWithAnalyzers = compilation?.WithAnalyzers(ImmutableArray<DiagnosticAnalyzer>.Empty.Add(this.CreateAnalyzer()));
+        var diags = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
+        Assert.That(diags.Count, Is.EqualTo(2));
+        Assert.That(diags[0].Id, Is.EqualTo("RARCH1"));
+        Assert.That(diags[0].GetMessage(), Is.EqualTo("Assembly Main has a forbidden reference to assembly Lib. Reference chain: Main->Lib."));
+        Assert.That(diags[1].Id, Is.EqualTo("RARCH1"));
+        Assert.That(diags[1].GetMessage(), Is.EqualTo("Assembly Main has a forbidden reference to assembly Lib2. Reference chain: Main->Lib2."));
+    }
 
     protected override string LanguageName => LanguageNames.CSharp;
     protected override DiagnosticAnalyzer CreateAnalyzer()
