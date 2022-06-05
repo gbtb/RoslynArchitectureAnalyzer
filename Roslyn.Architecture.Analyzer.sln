@@ -7,6 +7,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionFolder", "SolutionF
 		.config\dotnet-tools.json = .config\dotnet-tools.json
 		paket.lock = paket.lock
 		paket.dependencies = paket.dependencies
+		README.md = README.md
+		.circleci\config.yml = .circleci\config.yml
+		Directory.Build.props = Directory.Build.props
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Roslyn.Architecture.Abstractions", "src\Roslyn.Architecture.Abstractions\Roslyn.Architecture.Abstractions.csproj", "{BDD66DBC-E919-4B59-9E85-88326F9AAD8D}"
@@ -16,6 +19,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0D9DE34B-93AB-4EAF-8448-B1BC3EEC419C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Roslyn.Architecture.Tests", "tests\Roslyn.Architecture.Tests\Roslyn.Architecture.Tests.csproj", "{42C6F2D7-78E7-410B-AEB3-7D5704F3113B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Roslyn.Architecture.Package", "src\Roslyn.Architecture.Package\Roslyn.Architecture.Package.csproj", "{12A4B0B2-0C8F-4CC1-87DC-C99EC1763F01}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,10 +40,15 @@ Global
 		{42C6F2D7-78E7-410B-AEB3-7D5704F3113B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{42C6F2D7-78E7-410B-AEB3-7D5704F3113B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{42C6F2D7-78E7-410B-AEB3-7D5704F3113B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12A4B0B2-0C8F-4CC1-87DC-C99EC1763F01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12A4B0B2-0C8F-4CC1-87DC-C99EC1763F01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12A4B0B2-0C8F-4CC1-87DC-C99EC1763F01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12A4B0B2-0C8F-4CC1-87DC-C99EC1763F01}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{BDD66DBC-E919-4B59-9E85-88326F9AAD8D} = {B44FF5BB-7C57-44F9-BB1B-AFD9C92862EF}
 		{07689032-2065-4358-BFE3-3884B797673D} = {B44FF5BB-7C57-44F9-BB1B-AFD9C92862EF}
 		{42C6F2D7-78E7-410B-AEB3-7D5704F3113B} = {0D9DE34B-93AB-4EAF-8448-B1BC3EEC419C}
+		{12A4B0B2-0C8F-4CC1-87DC-C99EC1763F01} = {B44FF5BB-7C57-44F9-BB1B-AFD9C92862EF}
 	EndGlobalSection
 EndGlobal

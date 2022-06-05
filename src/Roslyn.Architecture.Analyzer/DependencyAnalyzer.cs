@@ -39,12 +39,7 @@ public class DependencyAnalyzer: DiagnosticAnalyzer
         {
             var cannotBeReferencedAttrs = GetAssemblyAttributesFromCompilation(reference.Compilation);
 
-            bool Predicate(AttributeData attr)
-            {
-                return !attr.ConstructorArguments.IsEmpty && (string?) attr.ConstructorArguments[0].Value == ctx.Ctx.Compilation.AssemblyName;
-            }
-
-            if (cannotBeReferencedAttrs.Any(Predicate))
+            if (cannotBeReferencedAttrs.Any(attr => !attr.ConstructorArguments.IsEmpty && (string?) attr.ConstructorArguments[0].Value == ctx.Ctx.Compilation.AssemblyName))
             {
                 var assemblyName = reference.Compilation.AssemblyName ?? string.Empty;
                 ctx.Ctx.ReportDiagnostic(Diagnostic.Create(CannotReferenceDiagnostic, Location.None, 
@@ -75,3 +70,4 @@ public class DependencyAnalyzer: DiagnosticAnalyzer
 
     private record SearchContext(CompilationAnalysisContext Ctx, ImmutableList<string> ReferencesPath, int Depth);
 }
+
