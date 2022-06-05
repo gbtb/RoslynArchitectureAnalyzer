@@ -99,6 +99,7 @@ public class Tests: AnalyzerTestFixture
         var diags = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
         Assert.That(diags.IsEmpty, Is.False);
         Assert.That(diags[0].Id, Is.EqualTo("RARCH1"));
+        Assert.That(diags[0].GetMessage(), Is.EqualTo("Assembly Main has a forbidden reference to assembly Lib. Reference chain: Main->Lib."));
     }
     
     [Test]
@@ -147,6 +148,7 @@ public class Tests: AnalyzerTestFixture
         var diags = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
         Assert.That(diags.IsEmpty, Is.False);
         Assert.That(diags[0].Id, Is.EqualTo("RARCH1"));
+        Assert.That(diags[0].GetMessage(), Is.EqualTo("Assembly Main has a forbidden reference to assembly Lib. Reference chain: Main->Lib2->Lib."));
     }
 
     protected override string LanguageName => LanguageNames.CSharp;
