@@ -25,13 +25,8 @@ public class Tests: AnalyzerTestFixture
         MSBuildLocator.RegisterDefaults();
     }
     
-    [SetUp]
-    public void Setup()
-    {
-    }
-
     [Test]
-    public async Task TestAttributeCanBeFound()
+    public async Task Test_AttributeCanBeFound()
     {
         var workspace = new AdhocWorkspace();
         var solution = workspace.AddSolution(SolutionInfo.Create(SolutionId.CreateNewId(), VersionStamp.Default));
@@ -76,9 +71,50 @@ public class Tests: AnalyzerTestFixture
         );
         var mainProject = workspace.AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Default, "Main", "Main", LanguageNames.CSharp));
 
+        var sourceText = @"
+                using System;
+                using Roslyn.Architecture.Abstractions;
+
+                [assembly:CannotBeReferencedBy(""Main"")]
+                namespace Lib 
+                {
+                    public class Foo
+                    {
+                        public int Prop { get; set; }
+                    }
+                }
+            ";
         
-        var assembly = typeof(int).Assembly;
-        
+        var doc = workspace.AddDocument(libProject.Id, "Lib.cs", SourceText.From(sourceText));
+        libProject = doc.Project;
+
+        var reference = new ProjectReference(libProject.Id);
+        var emptyDoc = workspace.CurrentSolution.GetProject(mainProject.Id)?.AddProjectReference(reference).AddDocument("Empty.cs", "");
+
+        workspace.WorkspaceFailed += (_, err) => Assert.Fail(err.ToString());
+        Assert.That(emptyDoc.Project.Solution.Projects.First().Documents.Count(), Is.EqualTo(1), "Expected solution structure hasn't been formed");
+
+        var compilation = await emptyDoc.Project.GetCompilationAsync();
+        var compilationWithAnalyzers = compilation?.WithAnalyzers(ImmutableArray<DiagnosticAnalyzer>.Empty.Add(this.CreateAnalyzer()));
+        var diags = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
+        Assert.That(diags.IsEmpty, Is.False);
+        Assert.That(diags[0].Id, Is.EqualTo("RARCH1"));
+    }
+    
+    [Test]
+    public async Task Test_AnalyzerFindsTransitiveReference()
+    {
+        var workspace = new AdhocWorkspace();
+        var solution = workspace.AddSolution(SolutionInfo.Create(SolutionId.CreateNewId(), VersionStamp.Default));
+        var runtimeAssembly = Assembly.Load("System.Runtime");
+        var libProject = workspace.AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Default, "Lib", "Lib", LanguageNames.CSharp, 
+            metadataReferences: CreateFrameworkMetadataReferences().Concat(  
+                new []{ ReferenceSource.FromType<CannotBeReferencedByAttribute>(), 
+                    ReferenceSource.FromAssembly(runtimeAssembly) }))
+        );
+        var lib2Project = workspace.AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Default, "Lib2", "Lib2", LanguageNames.CSharp));
+        var mainProject = workspace.AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Default, "Main", "Main", LanguageNames.CSharp));
+
         var sourceText = @"
                 using System;
                 using Roslyn.Architecture.Abstractions;
@@ -98,7 +134,10 @@ public class Tests: AnalyzerTestFixture
         libProject = doc.Project;
 
         var reference = new ProjectReference(libProject.Id);
-        var emptyDoc = workspace.CurrentSolution.GetProject(mainProject.Id)?.AddProjectReference(reference).AddDocument("Empty.cs", "");
+        solution = workspace.CurrentSolution.AddProjectReference(lib2Project.Id, reference);
+        reference = new ProjectReference(lib2Project.Id);
+        solution = solution.AddProjectReference(mainProject.Id, reference);
+        var emptyDoc = solution.GetProject(mainProject.Id)?.AddDocument("Empty.cs", "");
 
         workspace.WorkspaceFailed += (_, err) => Assert.Fail(err.ToString());
         Assert.That(emptyDoc.Project.Solution.Projects.First().Documents.Count(), Is.EqualTo(1), "Expected solution structure hasn't been formed");
@@ -108,9 +147,6 @@ public class Tests: AnalyzerTestFixture
         var diags = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
         Assert.That(diags.IsEmpty, Is.False);
         Assert.That(diags[0].Id, Is.EqualTo("RARCH1"));
-        //var analyzer = this.CreateAnalyzer();
-        //var compilation = await mainProject.GetCompilationAsync();
-        //analyzer.Initialize(new CompilationAnalysisContext(compilation, new AnalyzerOptions(ImmutableArray<AdditionalText>.Empty), ));
     }
 
     protected override string LanguageName => LanguageNames.CSharp;

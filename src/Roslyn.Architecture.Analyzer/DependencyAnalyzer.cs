@@ -10,7 +10,7 @@ namespace Roslyn.Architecture.Analyzer;
 public class DependencyAnalyzer: DiagnosticAnalyzer
 {
     private static readonly DiagnosticDescriptor CannotReferenceDiagnostic = new("RARCH1", "Cannot reference assembly",
-        "", "Architecture", DiagnosticSeverity.Error, true);
+        "Assembly {0} has a forbidden reference to assembly {1}", "Architecture", DiagnosticSeverity.Error, true);
     
     public DependencyAnalyzer()
     {
@@ -26,7 +26,12 @@ public class DependencyAnalyzer: DiagnosticAnalyzer
 
     private void AnalyzeReferences(CompilationAnalysisContext ctx)
     {
-        foreach (var reference in ctx.Compilation.References.OfType<CompilationReference>())
+        SearchLoop(ctx, ctx.Compilation);
+    }
+
+    private bool SearchLoop(CompilationAnalysisContext ctx, Compilation compilation)
+    {
+        foreach (var reference in compilation.References.OfType<CompilationReference>())
         {
             var cannotBeReferencedAttrs = GetAssemblyAttributesFromCompilation(reference.Compilation);
 
@@ -36,8 +41,19 @@ public class DependencyAnalyzer: DiagnosticAnalyzer
             }
 
             if (cannotBeReferencedAttrs.Any(Predicate))
-                ctx.ReportDiagnostic(Diagnostic.Create(CannotReferenceDiagnostic, Location.None));
+            {
+                ctx.ReportDiagnostic(Diagnostic.Create(CannotReferenceDiagnostic, Location.None, ctx.Compilation.AssemblyName, reference.Compilation.AssemblyName));
+                return true;
+            }
         }
+
+        foreach (var reference in compilation.References.OfType<CompilationReference>())
+        {
+            if (SearchLoop(ctx, reference.Compilation))
+                return true;
+        }
+
+        return false;
     }
 
     internal IEnumerable<AttributeData> GetAssemblyAttributesFromCompilation(Compilation referenceCompilation)
