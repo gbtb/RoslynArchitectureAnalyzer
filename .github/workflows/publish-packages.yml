@@ -15,5 +15,5 @@ jobs:
         working-directory: .
         run: dotnet paket restore
       - name: Build tests
-        working-directory: tests/AddXRefactoringTests
+        working-directory: tests/Roslyn.Architecture.Tests/
         run: dotnet build -c Debug
