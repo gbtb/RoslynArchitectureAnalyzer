@@ -8,6 +8,12 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
-      - name: Install paket & dotcover
+      - name: Install paket & coverlet
         run: dotnet tool restore
         working-directory: .
+      - name: Restore packages
+        working-directory: .
+        run: dotnet paket restore
+      - name: Build tests
+        working-directory: tests/AddXRefactoringTests
+        run: dotnet build -c Debug
