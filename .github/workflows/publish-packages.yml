@@ -13,7 +13,6 @@ jobs:
     runs-on: self-hosted
     needs: clone-source
     steps:
-      - uses: actions/checkout@v3
       - name: Install paket & coverlet
         run: dotnet tool restore
         working-directory: .
