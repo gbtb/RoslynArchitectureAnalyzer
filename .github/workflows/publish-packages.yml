@@ -5,6 +5,7 @@ on:
       - master
 jobs:
   build-and-test-analyzer:
+    container: mcr.microsoft.com/dotnet/sdk:6.0
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
