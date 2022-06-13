@@ -63,12 +63,7 @@ public class Tests: AnalyzerTestFixture
     {
         var workspace = new AdhocWorkspace();
         var solution = workspace.AddSolution(SolutionInfo.Create(SolutionId.CreateNewId(), VersionStamp.Default));
-        var runtimeAssembly = Assembly.Load("System.Runtime");
-        var libProject = workspace.AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Default, "Lib", "Lib", LanguageNames.CSharp, 
-            metadataReferences: CreateFrameworkMetadataReferences().Concat(  
-                new []{ ReferenceSource.FromType<CannotBeReferencedByAttribute>(), 
-                    ReferenceSource.FromAssembly(runtimeAssembly) }))
-        );
+        var libProject = PrepareLibProject(workspace);
         var mainProject = workspace.AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Default, "Main", "Main", LanguageNames.CSharp));
 
         var sourceText = @"
@@ -101,18 +96,30 @@ public class Tests: AnalyzerTestFixture
         Assert.That(diags[0].Id, Is.EqualTo("RARCH1"));
         Assert.That(diags[0].GetMessage(), Is.EqualTo("Assembly Main has a forbidden reference to assembly Lib. Reference chain: Main->Lib."));
     }
-    
+
+    private Project PrepareLibProject(AdhocWorkspace workspace, string name = "Lib")
+    {
+        var runtimeAssembly = Assembly.Load("System.Runtime");
+        var netstandardAssembly = Assembly.Load("netstandard");
+        var libProject = workspace.AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Default, name,
+            name, LanguageNames.CSharp,
+            metadataReferences: CreateFrameworkMetadataReferences().Concat(
+                new[]
+                {
+                    ReferenceSource.FromType<CannotBeReferencedByAttribute>(),
+                    ReferenceSource.FromAssembly(runtimeAssembly),
+                    ReferenceSource.FromAssembly(netstandardAssembly)
+                }))
+        );
+        return libProject;
+    }
+
     [Test]
     public async Task Test_AnalyzerFindsTransitiveReference()
     {
         var workspace = new AdhocWorkspace();
         var solution = workspace.AddSolution(SolutionInfo.Create(SolutionId.CreateNewId(), VersionStamp.Default));
-        var runtimeAssembly = Assembly.Load("System.Runtime");
-        var libProject = workspace.AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Default, "Lib", "Lib", LanguageNames.CSharp, 
-            metadataReferences: CreateFrameworkMetadataReferences().Concat(  
-                new []{ ReferenceSource.FromType<CannotBeReferencedByAttribute>(), 
-                    ReferenceSource.FromAssembly(runtimeAssembly) }))
-        );
+        var libProject = PrepareLibProject(workspace);
         var lib2Project = workspace.AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Default, "Lib2", "Lib2", LanguageNames.CSharp));
         var mainProject = workspace.AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Default, "Main", "Main", LanguageNames.CSharp));
 
@@ -156,17 +163,8 @@ public class Tests: AnalyzerTestFixture
     {
         var workspace = new AdhocWorkspace();
         var solution = workspace.AddSolution(SolutionInfo.Create(SolutionId.CreateNewId(), VersionStamp.Default));
-        var runtimeAssembly = Assembly.Load("System.Runtime");
-        var libProject = workspace.AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Default, "Lib", "Lib", LanguageNames.CSharp, 
-            metadataReferences: CreateFrameworkMetadataReferences().Concat(  
-                new []{ ReferenceSource.FromType<CannotBeReferencedByAttribute>(), 
-                    ReferenceSource.FromAssembly(runtimeAssembly) }))
-        );
-        var lib2Project = workspace.AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Default, "Lib2", "Lib2", LanguageNames.CSharp,
-            metadataReferences: CreateFrameworkMetadataReferences().Concat(  
-                new []{ ReferenceSource.FromType<CannotBeReferencedByAttribute>(), 
-                    ReferenceSource.FromAssembly(runtimeAssembly) }))
-            );
+        var libProject = PrepareLibProject(workspace);
+        var lib2Project = PrepareLibProject(workspace, "Lib2");
         var mainProject = workspace.AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Default, "Main", "Main", LanguageNames.CSharp));
 
         var sourceText = @"
