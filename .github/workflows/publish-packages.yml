@@ -18,7 +18,7 @@ jobs:
   restore:
     container: 
       image: mcr.microsoft.com/dotnet/sdk:6.0
-      options: --user ${{ needs.configure.outputs.uid_gid }}
+      options: --user ${{ needs.configure.outputs.uid_gid }} -e COMPlus_EnableDiagnostics=0
       volumes: 
         - /github:/tmp
     runs-on: self-hosted
@@ -42,7 +42,7 @@ jobs:
       image: mcr.microsoft.com/dotnet/sdk:6.0
       volumes: 
         - /github:/tmp
-      options: --user ${{ needs.configure.outputs.uid_gid }}
+      options: --user ${{ needs.configure.outputs.uid_gid }} -e COMPlus_EnableDiagnostics=0
     runs-on: self-hosted
     steps:
     - name: Build tests
