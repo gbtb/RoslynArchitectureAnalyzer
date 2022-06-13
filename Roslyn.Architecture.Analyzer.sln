@@ -11,6 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionFolder", "SolutionF
 		.circleci\config.yml = .circleci\config.yml
 		Directory.Build.props = Directory.Build.props
 		.github\workflows\publish-packages.yml = .github\workflows\publish-packages.yml
+		.paket\Paket.Restore.targets = .paket\Paket.Restore.targets
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Roslyn.Architecture.Abstractions", "src\Roslyn.Architecture.Abstractions\Roslyn.Architecture.Abstractions.csproj", "{BDD66DBC-E919-4B59-9E85-88326F9AAD8D}"
