@@ -53,3 +53,13 @@ jobs:
       - name: Pack attributes package
         working-directory: src/MicrosoftDI.AddXRefactoring.Attributes
         run: dotnet build -c release
+      - name: Store packages
+        uses: actions/upload-artifact@v3
+        with:
+          name: nuget_packages
+          path: src/nupkg
+      - name: Store coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          path: tests/AddXRefactoringTests/coverage
+          name: coverage
