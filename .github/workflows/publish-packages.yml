@@ -47,11 +47,11 @@ jobs:
             curl -Os https://uploader.codecov.io/v0.1.17/linux/codecov
             chmod +x codecov
             ./codecov -f coverage.opencover.xml
-      - name: Pack roslyn code-refactoring
-        working-directory: src/MicrosoftDI.AddXRefactoring.Package
+      - name: Pack roslyn analyzer
+        working-directory: src/Roslyn.Architecture.Analyzer
         run: dotnet build -c release
       - name: Pack attributes package
-        working-directory: src/MicrosoftDI.AddXRefactoring.Attributes
+        working-directory: src/Roslyn.Architecture.Abstractions
         run: dotnet build -c release
       - name: Store packages
         uses: actions/upload-artifact@v3
@@ -61,5 +61,5 @@ jobs:
       - name: Store coverage report
         uses: actions/upload-artifact@v3
         with:
-          path: tests/AddXRefactoringTests/coverage
+          path: tests/Roslyn.Architecture.Tests/coverage
           name: coverage
