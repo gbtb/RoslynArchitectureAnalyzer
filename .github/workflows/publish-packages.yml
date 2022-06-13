@@ -7,6 +7,8 @@ jobs:
   clone-source:
     runs-on: self-hosted
     steps:
+      - name: Clean the workspace
+        run: rm -rf $GITHUB_WORKSPACE/*
       - uses: actions/checkout@v3
   restore:
     container: 
