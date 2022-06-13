@@ -4,11 +4,16 @@ on:
     branches:
       - master
 jobs:
-  clone-source:
+  clean-after-ghrunner:
     runs-on: self-hosted
+    container: 
+      image: mcr.microsoft.com/dotnet/sdk:6.0
     steps:
       - name: Clean the workspace
         run: rm -rf $GITHUB_WORKSPACE/*
+  clone-source:
+    runs-on: self-hosted
+    steps:
       - uses: actions/checkout@v3
   restore:
     container: 
