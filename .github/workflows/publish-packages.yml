@@ -12,7 +12,6 @@ jobs:
   #    - name: Clean the workspace
   #      run: rm -rf $GITHUB_WORKSPACE/*
   clone-source:
-    needs: clean-after-ghrunner
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
