@@ -54,6 +54,7 @@ jobs:
         working-directory: src/Roslyn.Architecture.Abstractions
         run: dotnet build -c release
   store-artifacts:
+    needs: restore
     runs-on: self-hosted
     steps:
       - name: Store packages
