@@ -1,8 +1,6 @@
 name: publish-packages
 on: 
-  push:
-    branches:
-      - master
+  push
 jobs:
   configure:
     runs-on: self-hosted
@@ -67,3 +65,22 @@ jobs:
         with:
           path: tests/Roslyn.Architecture.Tests/coverage
           name: coverage
+  publish-to-nuget:
+    environment: Main
+    if: github.ref == 'refs/heads/master'
+    needs: store-artifacts
+    runs-on: self-hosted
+    container:
+      image: mcr.microsoft.com/dotnet/sdk:6.0
+      options: --user ${{ needs.configure.outputs.uid_gid }} -e COMPlus_EnableDiagnostics=0
+    steps:
+      - name: Prepare packages
+        uses: actions/download-artifact@v3
+        with:
+          name: nuget_packages
+      - name: Push packages
+        env: # Or as an environment variable
+          NUGET_FEED_URL: ${{ secrets.NUGET_FEED_URL }}
+          NUGET_KEY: ${{ secrets.NUGET_KEY }}
+        working-directory: nuget_packages
+        run: dotnet nuget push --source "$NUGET_FEED_URL" --api-key="$NUGET_KEY" *.nupkg
