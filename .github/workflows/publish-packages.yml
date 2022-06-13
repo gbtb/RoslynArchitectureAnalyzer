@@ -53,6 +53,9 @@ jobs:
       - name: Pack attributes package
         working-directory: src/Roslyn.Architecture.Abstractions
         run: dotnet build -c release
+  store-artifacts:
+    runs-on: self-hosted
+    steps:
       - name: Store packages
         uses: actions/upload-artifact@v3
         with:
