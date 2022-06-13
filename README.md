@@ -3,7 +3,7 @@
 
 # Roslyn Architecture Analyzer
 
-The ultimate goal of this project is to augment Roslyn C# compiler with additional architecture-related rules.
+The ultimate goal of this project is to augment Roslyn C# compiler with additional architecture-related rules. Unlike the more common unit-test based approach, I envision this analyzers to be a part of the main compilation process, with near-instant feedback for developer.
 These rules should be:
 * Fast
 * Portable
@@ -20,3 +20,7 @@ Basically, this attribute is an antipode of InternalsVisibleTo attribute.
 ### Usage instructions
 Install ArchRoslyn.Abstractions package in order to mark assemblies with this attribute.
 Install ArchRoslyn.Analyzer into your projects to enable validation of rules imposed by an attribute.
+
+## List of ideas
+* Explore unit-testing lib APIs for inspiration and possible adoption as an interface for Roslyn-based rules.
+* How to expand CannotBeReferencedBy attributes to allow more generic configuration? - e.g. layers, folders, wildcards, etc.
