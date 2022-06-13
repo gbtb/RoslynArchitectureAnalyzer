@@ -4,13 +4,13 @@ on:
     branches:
       - master
 jobs:
-  #clean-after-ghrunner:
-  #  runs-on: self-hosted
-  #  container: 
-  #    image: mcr.microsoft.com/dotnet/sdk:6.0
-  #  steps:
-  #    - name: Clean the workspace
-  #      run: rm -rf $GITHUB_WORKSPACE/*
+  configure:
+    runs-on: self-hosted
+    outputs:
+      uid_gid: ${{ steps.get-user.outputs.uid_gid }}
+    steps:
+      - id: get-user
+        run: echo "::set-output name=uid_gid::$(id -u):$(id -g)"
   clone-source:
     runs-on: self-hosted
     steps:
@@ -18,11 +18,13 @@ jobs:
   restore:
     container: 
       image: mcr.microsoft.com/dotnet/sdk:6.0
-      options: --security-opt seccomp=unconfined
+      options: --user ${{ needs.configure.outputs.uid_gid }}
       volumes: 
         - /github:/tmp
     runs-on: self-hosted
-    needs: clone-source
+    needs: 
+      - clone-source
+      - configure
     steps:
       - name: Install paket & coverlet
         run: dotnet tool restore
@@ -33,12 +35,15 @@ jobs:
           dotnet paket restore
           dotnet restore
   run-tests:
+    needs: 
+      - configure
+      - restore
     container: 
       image: mcr.microsoft.com/dotnet/sdk:6.0
       volumes: 
         - /github:/tmp
+      options: --user ${{ needs.configure.outputs.uid_gid }}
     runs-on: self-hosted
-    needs: restore
     steps:
     - name: Build tests
       working-directory: tests/Roslyn.Architecture.Tests/
