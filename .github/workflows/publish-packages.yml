@@ -18,6 +18,7 @@ jobs:
   restore:
     container: 
       image: mcr.microsoft.com/dotnet/sdk:6.0
+      options: --security-opt seccomp=unconfined
       volumes: 
         - /github:/tmp
     runs-on: self-hosted
