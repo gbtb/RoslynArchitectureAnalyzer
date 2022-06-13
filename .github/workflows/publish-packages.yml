@@ -67,7 +67,7 @@ jobs:
           name: coverage
   publish-to-nuget:
     environment: Main
-    #if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/master'
     needs: 
       - store-artifacts
       - configure

@@ -12,7 +12,7 @@
         <Description>
             Abstractions and attributes for Roslyn.Architecture.Analyzers
         </Description>
-        <PackageId>Roslyn.Architecture.Abstractions</PackageId>
+        <PackageId>ArchRoslyn.Abstractions</PackageId>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
     
