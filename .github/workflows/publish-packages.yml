@@ -11,7 +11,7 @@ jobs:
   restore:
     container: 
       image: mcr.microsoft.com/dotnet/sdk:6.0
-      options: --user 1000
+      options: --user 995:992
       volumes: 
         - /github:/tmp
     runs-on: self-hosted
@@ -26,7 +26,7 @@ jobs:
   run-tests:
     container: 
       image: mcr.microsoft.com/dotnet/sdk:6.0
-      options: --user 1000
+      options: --user 995:992
       volumes: 
         - /github:/tmp
     runs-on: self-hosted
