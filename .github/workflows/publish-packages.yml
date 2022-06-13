@@ -68,7 +68,9 @@ jobs:
   publish-to-nuget:
     environment: Main
     #if: github.ref == 'refs/heads/master'
-    needs: store-artifacts
+    needs: 
+      - store-artifacts
+      - configure
     runs-on: self-hosted
     container:
       image: mcr.microsoft.com/dotnet/sdk:6.0
