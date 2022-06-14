@@ -46,7 +46,7 @@ jobs:
             chmod +x codecov
             ./codecov -f coverage.opencover.xml
       - name: Pack roslyn analyzer
-        working-directory: src/Roslyn.Architecture.Analyzer
+        working-directory: src/Roslyn.Architecture.Package
         run: dotnet build -c release
       - name: Pack attributes package
         working-directory: src/Roslyn.Architecture.Abstractions

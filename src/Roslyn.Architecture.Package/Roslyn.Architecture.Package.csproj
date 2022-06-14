@@ -12,7 +12,7 @@
         <Description>
             Roslyn analyzers for architecture validation
         </Description>
-        <PackageId>Roslyn.Architecture.Analyzers</PackageId>
+        <PackageId>ArchRoslyn.Analyzers</PackageId>
         <DevelopmentDependency>true</DevelopmentDependency>
         <NoPackageAnalysis>true</NoPackageAnalysis>
         <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddAnalyzersToOutput</TargetsForTfmSpecificContentInPackage>

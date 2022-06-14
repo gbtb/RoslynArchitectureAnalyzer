@@ -8,7 +8,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionFolder", "SolutionF
 		paket.lock = paket.lock
 		paket.dependencies = paket.dependencies
 		README.md = README.md
-		.circleci\config.yml = .circleci\config.yml
 		Directory.Build.props = Directory.Build.props
 		.github\workflows\publish-packages.yml = .github\workflows\publish-packages.yml
 		.paket\Paket.Restore.targets = .paket\Paket.Restore.targets
