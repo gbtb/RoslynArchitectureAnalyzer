@@ -55,7 +55,7 @@ public class Tests: AnalyzerTestFixture
 
         var analyzer = new DependencyAnalyzer();
         
-        Assert.That(analyzer.GetAssemblyAttributesFromCompilation(compilation).Count(), Is.EqualTo(2));
+        Assert.That(DependencyAnalyzer.GetAssemblyAttributesFromCompilation(compilation.Assembly).Count(), Is.EqualTo(2));
     }
 
     [Test]
@@ -63,7 +63,8 @@ public class Tests: AnalyzerTestFixture
     {
         var workspace = new AdhocWorkspace();
         var solution = workspace.AddSolution(SolutionInfo.Create(SolutionId.CreateNewId(), VersionStamp.Default));
-        var libProject = PrepareLibProject(workspace);
+        var analyzers = ImmutableArray<DiagnosticAnalyzer>.Empty.Add(this.CreateAnalyzer());
+        var libProject = PrepareLibProject(workspace, new AnalyzerReference[] { new AnalyzerImageReference(analyzers)});
         var mainProject = workspace.AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Default, "Main", "Main", LanguageNames.CSharp));
 
         var sourceText = @"
@@ -79,6 +80,7 @@ public class Tests: AnalyzerTestFixture
                     }
                 }
             ";
+
         
         var doc = workspace.AddDocument(libProject.Id, "Lib.cs", SourceText.From(sourceText));
         libProject = doc.Project;
@@ -89,20 +91,25 @@ public class Tests: AnalyzerTestFixture
         workspace.WorkspaceFailed += (_, err) => Assert.Fail(err.ToString());
         Assert.That(emptyDoc.Project.Solution.Projects.First().Documents.Count(), Is.EqualTo(1), "Expected solution structure hasn't been formed");
 
-        var compilation = await emptyDoc.Project.GetCompilationAsync();
-        var compilationWithAnalyzers = compilation?.WithAnalyzers(ImmutableArray<DiagnosticAnalyzer>.Empty.Add(this.CreateAnalyzer()));
+        var compilation = await libProject.GetCompilationAsync();
+        
+        compilation = await emptyDoc.Project.GetCompilationAsync();
+        var compilationWithAnalyzers = compilation?.WithAnalyzers(analyzers);
         var diags = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
+        
         Assert.That(diags.IsEmpty, Is.False);
         Assert.That(diags[0].Id, Is.EqualTo("RARCH1"));
         Assert.That(diags[0].GetMessage(), Is.EqualTo("Assembly Main has a forbidden reference to assembly Lib. Reference chain: Main->Lib."));
     }
 
-    private Project PrepareLibProject(AdhocWorkspace workspace, string name = "Lib")
+    private Project PrepareLibProject(AdhocWorkspace workspace, IEnumerable<AnalyzerReference> analyzers,
+        string name = "Lib")
     {
         var runtimeAssembly = Assembly.Load("System.Runtime");
         var netstandardAssembly = Assembly.Load("netstandard");
         var libProject = workspace.AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Default, name,
             name, LanguageNames.CSharp,
+            analyzerReferences: analyzers,
             metadataReferences: CreateFrameworkMetadataReferences().Concat(
                 new[]
                 {
@@ -111,6 +118,7 @@ public class Tests: AnalyzerTestFixture
                     ReferenceSource.FromAssembly(netstandardAssembly)
                 }))
         );
+        
         return libProject;
     }
 
@@ -119,7 +127,8 @@ public class Tests: AnalyzerTestFixture
     {
         var workspace = new AdhocWorkspace();
         var solution = workspace.AddSolution(SolutionInfo.Create(SolutionId.CreateNewId(), VersionStamp.Default));
-        var libProject = PrepareLibProject(workspace);
+        var analyzers = ImmutableArray<DiagnosticAnalyzer>.Empty.Add(CreateAnalyzer());
+        var libProject = PrepareLibProject(workspace, new AnalyzerReference[] { new AnalyzerImageReference(analyzers)});
         var lib2Project = workspace.AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Default, "Lib2", "Lib2", LanguageNames.CSharp));
         var mainProject = workspace.AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Default, "Main", "Main", LanguageNames.CSharp));
 
@@ -151,7 +160,7 @@ public class Tests: AnalyzerTestFixture
         Assert.That(emptyDoc.Project.Solution.Projects.First().Documents.Count(), Is.EqualTo(1), "Expected solution structure hasn't been formed");
 
         var compilation = await emptyDoc.Project.GetCompilationAsync();
-        var compilationWithAnalyzers = compilation?.WithAnalyzers(ImmutableArray<DiagnosticAnalyzer>.Empty.Add(this.CreateAnalyzer()));
+        var compilationWithAnalyzers = compilation?.WithAnalyzers(analyzers);
         var diags = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
         Assert.That(diags.IsEmpty, Is.False);
         Assert.That(diags[0].Id, Is.EqualTo("RARCH1"));
@@ -163,8 +172,9 @@ public class Tests: AnalyzerTestFixture
     {
         var workspace = new AdhocWorkspace();
         var solution = workspace.AddSolution(SolutionInfo.Create(SolutionId.CreateNewId(), VersionStamp.Default));
-        var libProject = PrepareLibProject(workspace);
-        var lib2Project = PrepareLibProject(workspace, "Lib2");
+        var analyzers = ImmutableArray<DiagnosticAnalyzer>.Empty.Add(CreateAnalyzer());
+        var libProject = PrepareLibProject(workspace, new AnalyzerReference[] { new AnalyzerImageReference(analyzers)});
+        var lib2Project = PrepareLibProject(workspace, new AnalyzerReference[] { new AnalyzerImageReference(analyzers)}, "Lib2");
         var mainProject = workspace.AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Default, "Main", "Main", LanguageNames.CSharp));
 
         var sourceText = @"
@@ -197,7 +207,7 @@ public class Tests: AnalyzerTestFixture
         Assert.That(emptyDoc.Project.Solution.Projects.First().Documents.Count(), Is.EqualTo(1), "Expected solution structure hasn't been formed");
 
         var compilation = await emptyDoc.Project.GetCompilationAsync();
-        var compilationWithAnalyzers = compilation?.WithAnalyzers(ImmutableArray<DiagnosticAnalyzer>.Empty.Add(this.CreateAnalyzer()));
+        var compilationWithAnalyzers = compilation?.WithAnalyzers(analyzers);
         var diags = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
         Assert.That(diags.Count, Is.EqualTo(2));
         Assert.That(diags[0].Id, Is.EqualTo("RARCH1"));

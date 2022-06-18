@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
@@ -12,9 +13,12 @@ public class DependencyAnalyzer: DiagnosticAnalyzer
 {
     private static readonly DiagnosticDescriptor CannotReferenceDiagnostic = new("RARCH1", "Cannot reference assembly",
         "Assembly {0} has a forbidden reference to assembly {1}. Reference chain: {2}.", "Architecture", DiagnosticSeverity.Error, true);
-    
+
+    private ConcurrentDictionary<string, SearchContext> _forbiddenReferenceChains;
+
     public DependencyAnalyzer()
     {
+        _forbiddenReferenceChains = new ConcurrentDictionary<string, SearchContext>();
         SupportedDiagnostics = ImmutableArray.Create(CannotReferenceDiagnostic);
     }
 
@@ -24,42 +28,53 @@ public class DependencyAnalyzer: DiagnosticAnalyzer
         context.EnableConcurrentExecution();
         context.RegisterCompilationAction(AnalyzeReferences);
     }
+   
 
     private void AnalyzeReferences(CompilationAnalysisContext ctx)
     {
-        SearchLoop(new SearchContext(ctx, ImmutableList<string>.Empty.Add(ctx.Compilation.AssemblyName ?? string.Empty), 0), ctx.Compilation);
-    }
-
-    private void SearchLoop(SearchContext ctx, Compilation compilation)
-    {
-        if (ctx.Depth > 32) //protection from SO, just in case
-            return;
-        
-        foreach (var reference in compilation.References.OfType<CompilationReference>())
+        var compilation = ctx.Compilation;
+        if (_forbiddenReferenceChains.Count > 0)
         {
-            var cannotBeReferencedAttrs = GetAssemblyAttributesFromCompilation(reference.Compilation);
+            var forbiddenDeps =
+                compilation.ReferencedAssemblyNames.Where(r => _forbiddenReferenceChains.ContainsKey(r.Name));
 
-            if (cannotBeReferencedAttrs.Any(attr => !attr.ConstructorArguments.IsEmpty && (string?) attr.ConstructorArguments[0].Value == ctx.Ctx.Compilation.AssemblyName))
+            foreach (var assemblyIdentity in forbiddenDeps)
             {
-                var assemblyName = reference.Compilation.AssemblyName ?? string.Empty;
-                ctx.Ctx.ReportDiagnostic(Diagnostic.Create(CannotReferenceDiagnostic, Location.None, 
-                    ctx.Ctx.Compilation.AssemblyName, reference.Compilation.AssemblyName,
-                    string.Join("->", ctx.ReferencesPath.Concat(new []{assemblyName}))
-                    ));
+                var searchContext = _forbiddenReferenceChains[assemblyIdentity.Name];
+                if (searchContext.ForbiddenReferrerName == compilation.AssemblyName)
+                    ctx.ReportDiagnostic(Diagnostic.Create(CannotReferenceDiagnostic, Location.None, 
+                        compilation.AssemblyName, searchContext.ForbiddenReferenceName,
+                        string.Join("->", searchContext.ReferenceChain.Push(compilation.AssemblyName)))
+                    );
+                
+                var newContext = searchContext with
+                {
+                    ReferenceChain = searchContext.ReferenceChain.Push(assemblyIdentity.Name)
+                };
+                _forbiddenReferenceChains[assemblyIdentity.Name] = newContext;
             }
         }
-
-        foreach (var reference in compilation.References.OfType<CompilationReference>())
+        
+        var cannotBeReferencedAttrs = GetAssemblyAttributesFromCompilation(compilation.Assembly);
+        foreach (var attributeData in cannotBeReferencedAttrs)
         {
-            SearchLoop(
-                ctx with {ReferencesPath = ctx.ReferencesPath.Add(reference.Compilation.AssemblyName ?? string.Empty), Depth = ctx.Depth + 1},
-                reference.Compilation);
+            if (attributeData.ConstructorArguments.IsEmpty && attributeData.ConstructorArguments[0].Value is string refName && compilation.AssemblyName is {})
+            {
+                var c = new SearchContext
+                {
+                    ReferenceChain = ImmutableStack<string>.Empty.Push(compilation.AssemblyName),
+                    ForbiddenReferrerName = refName,
+                    ForbiddenReferenceName = compilation.AssemblyName
+                };
+
+                _forbiddenReferenceChains[compilation.AssemblyName] = c;
+            }
         }
     }
 
-    internal IEnumerable<AttributeData> GetAssemblyAttributesFromCompilation(Compilation referenceCompilation)
+    internal static IEnumerable<AttributeData> GetAssemblyAttributesFromCompilation(IAssemblySymbol assemblySymbol)
     {
-        var attributes = referenceCompilation.Assembly.GetAttributes();
+        var attributes = assemblySymbol.GetAttributes();
         if (attributes.IsEmpty)
             return Enumerable.Empty<AttributeData>();
 
@@ -67,7 +82,5 @@ public class DependencyAnalyzer: DiagnosticAnalyzer
     }
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; }
-
-    private record SearchContext(CompilationAnalysisContext Ctx, ImmutableList<string> ReferencesPath, int Depth);
 }
 
