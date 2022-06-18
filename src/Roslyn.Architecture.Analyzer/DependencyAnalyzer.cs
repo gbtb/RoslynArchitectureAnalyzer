@@ -22,7 +22,12 @@ public class DependencyAnalyzer: DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.Analyze | GeneratedCodeAnalysisFlags.ReportDiagnostics);
         context.EnableConcurrentExecution();
-        context.RegisterCompilationAction(AnalyzeReferences);
+#pragma warning disable RS1013
+        context.RegisterCompilationStartAction(startContext =>
+#pragma warning restore RS1013
+        {
+            startContext.RegisterCompilationEndAction(AnalyzeReferences);
+        });
     }
 
     private void AnalyzeReferences(CompilationAnalysisContext ctx)
