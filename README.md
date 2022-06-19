@@ -1,4 +1,4 @@
-[![Nuget](https://img.shields.io/nuget/v/ArchRoslyn.Analyzer)](https://www.nuget.org/packages/Roslyn.Architecture.Analyzer/)
+[![Nuget](https://img.shields.io/nuget/v/ArchRoslyn.Analyzers)](https://www.nuget.org/packages/ArchRoslyn.Analyzers)
 [![codecov](https://codecov.io/gh/gbtb/RoslynArchitectureAnalyzer/branch/master/graph/badge.svg?token=SP9HHTRPE7)](https://codecov.io/gh/gbtb/RoslynArchitectureAnalyzer)
 
 # Roslyn Architecture Analyzer
