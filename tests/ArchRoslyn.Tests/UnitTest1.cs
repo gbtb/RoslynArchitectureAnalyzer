@@ -238,7 +238,7 @@ public class Tests: AnalyzerTestFixture
         lib2Project = solution.GetProject(lib2Project.Id);
         await RunAnalyzersOnProjectAsync(libProject, analyzers);
         await RunAnalyzersOnProjectAsync(lib2Project, analyzers);
-
+        
         diags = await RunAnalyzersOnProjectAsync(solution.GetProject(mainProject.Id), analyzers);
         Assert.That(diags.IsEmpty, Is.True);
     }
@@ -294,7 +294,8 @@ public class Tests: AnalyzerTestFixture
     }
     
     [Test]
-    public async Task Test_AnalyzerFindsMultipleViolationsFromMultipleAttributes()
+    [TestCaseSource(nameof(MultipleAttributesWithDifferentOrder))]
+    public async Task Test_AnalyzerFindsMultipleViolationsFromMultipleAttributes(string sourceText)
     {
         var workspace = new AdhocWorkspace();
         var solution = workspace.AddSolution(SolutionInfo.Create(SolutionId.CreateNewId(), VersionStamp.Default));
@@ -302,21 +303,6 @@ public class Tests: AnalyzerTestFixture
         var libProject = PrepareLibProject(workspace, new AnalyzerReference[] { new AnalyzerImageReference(analyzers)});
         var lib2Project = PrepareLibProject(workspace, new AnalyzerReference[] { new AnalyzerImageReference(analyzers)}, "Lib2");
         var mainProject = workspace.AddProject(ProjectInfo.Create(ProjectId.CreateNewId(), VersionStamp.Default, "Main", "Main", LanguageNames.CSharp));
-
-        var sourceText = @"
-                using System;
-                using ArchRoslyn.Attributes;
-
-                [assembly:CannotBeReferencedBy(""Lib2"")]
-                [assembly:CannotBeReferencedBy(""Main"")]
-                namespace Lib 
-                {
-                    public class Foo
-                    {
-                        public int Prop { get; set; }
-                    }
-                }
-            ";
         
         
         var doc = workspace.AddDocument(libProject.Id, "Lib.cs", SourceText.From(sourceText));
@@ -343,6 +329,38 @@ public class Tests: AnalyzerTestFixture
         Assert.That(diags.Count, Is.EqualTo(1));
         Assert.That(diags[0].Id, Is.EqualTo("RARCH1"));
         Assert.That(diags[0].GetMessage(), Is.EqualTo("Assembly Main has a forbidden reference to assembly Lib. Reference chain: Main->Lib."));
+    }
+
+    private static IEnumerable<TestCaseData> MultipleAttributesWithDifferentOrder() {
+        yield return  new TestCaseData(@"
+                using System;
+                using ArchRoslyn.Attributes;
+
+                [assembly:CannotBeReferencedBy(""Lib2"")]
+                [assembly:CannotBeReferencedBy(""Main"")]
+                namespace Lib 
+                {
+                    public class Foo
+                    {
+                        public int Prop { get; set; }
+                    }
+                }
+            ").SetName("1st");
+        
+        yield return  new TestCaseData(@"
+                using System;
+                using ArchRoslyn.Attributes;
+
+                [assembly:CannotBeReferencedBy(""Main"")]
+                [assembly:CannotBeReferencedBy(""Lib2"")]
+                namespace Lib 
+                {
+                    public class Foo
+                    {
+                        public int Prop { get; set; }
+                    }
+                }
+            ").SetName("2nd");
     }
 
     protected override string LanguageName => LanguageNames.CSharp;
