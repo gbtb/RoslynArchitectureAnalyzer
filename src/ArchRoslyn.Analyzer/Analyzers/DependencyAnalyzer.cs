@@ -33,7 +33,6 @@ public class DependencyAnalyzer: DiagnosticAnalyzer
 
     public override void Initialize(AnalysisContext context)
     {
-        Debugger.Launch();
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.Analyze | GeneratedCodeAnalysisFlags.ReportDiagnostics);
         context.EnableConcurrentExecution();
         context.TryGetValue(_emptySource, _valueProvider, out var _); //initializing shared state
