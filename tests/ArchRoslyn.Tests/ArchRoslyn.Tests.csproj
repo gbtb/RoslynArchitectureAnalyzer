@@ -6,9 +6,10 @@
     <IsPackable>false</IsPackable>
     <DisableMSBuildAssemblyCopyCheck>true</DisableMSBuildAssemblyCopyCheck>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <RootNamespace>Roslyn.Architecture.Tests</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Roslyn.Architecture.Analyzer\Roslyn.Architecture.Analyzer.csproj" />
+    <ProjectReference Include="..\..\src\ArchRoslyn.Analyzer\ArchRoslyn.Analyzer.csproj" />
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

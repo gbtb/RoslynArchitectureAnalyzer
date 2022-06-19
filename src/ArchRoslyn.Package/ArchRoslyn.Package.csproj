@@ -19,7 +19,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Roslyn.Architecture.Analyzer\Roslyn.Architecture.Analyzer.csproj" />
+        <ProjectReference Include="..\ArchRoslyn.Analyzer\ArchRoslyn.Analyzer.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -28,7 +28,7 @@
 
     <Target Name="_AddAnalyzersToOutput">
         <ItemGroup>
-            <TfmSpecificPackageFile Include="$(OutputPath)\Roslyn.Architecture.Analyzer.dll" PackagePath="analyzers/dotnet/cs" />
+            <TfmSpecificPackageFile Include="$(OutputPath)\ArchRoslyn.Analyzer.dll" PackagePath="analyzers/dotnet/cs" />
         </ItemGroup>
     </Target>
 

@@ -31,26 +31,26 @@ jobs:
           dotnet paket restore
           dotnet restore
       - name: Build tests
-        working-directory: tests/Roslyn.Architecture.Tests/
+        working-directory: tests/ArchRoslyn.Tests/
         run: dotnet build -c Debug --no-restore
       - name: Run tests with code coverage
-        working-directory: tests/Roslyn.Architecture.Tests/
-        run: dotnet coverlet bin/Debug/net6.0/Roslyn.Architecture.Tests.dll -f opencover --target "dotnet" --targetargs "test --no-build" 
+        working-directory: tests/ArchRoslyn.Tests/
+        run: dotnet coverlet bin/Debug/net6.0/ArchRoslyn.Tests.dll -f opencover --target "dotnet" --targetargs "test --no-build" 
       - name: Run report generator
-        working-directory: tests/Roslyn.Architecture.Tests/
+        working-directory: tests/ArchRoslyn.Tests/
         run: dotnet reportgenerator -reports:coverage.opencover.xml -targetdir:coverage
       - name: Upload coverage to codecov
-        working-directory: tests/Roslyn.Architecture.Tests/
+        working-directory: tests/ArchRoslyn.Tests/
         run: |
             curl -Os https://uploader.codecov.io/v0.1.17/linux/codecov
             chmod +x codecov
             ./codecov -f coverage.opencover.xml
       - name: Pack roslyn analyzer
-        working-directory: src/Roslyn.Architecture.Package
+        working-directory: src/ArchRoslyn.Package
         run: dotnet build -c release
-      - name: Pack attributes package
-        working-directory: src/Roslyn.Architecture.Abstractions
-        run: dotnet build -c release
+#      - name: Pack attributes package
+#        working-directory: src/Roslyn.Architecture.Abstractions
+#        run: dotnet build -c release
   store-artifacts:
     needs: restore
     runs-on: self-hosted
@@ -63,7 +63,7 @@ jobs:
       - name: Store coverage report
         uses: actions/upload-artifact@v3
         with:
-          path: tests/Roslyn.Architecture.Tests/coverage
+          path: tests/ArchRoslyn.Tests/coverage
           name: coverage
   publish-to-nuget:
     environment: Main

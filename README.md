@@ -14,12 +14,17 @@ If you need more advanced capabilities, you should check out [ArchUnitNET](https
 
 ## CannotBeReferencedBy attribute
 
-This is an assembly attribute that takes one string argument with a name of an assembly and forbids direct and transitive references from the specified assembly to the assembly marked with this attribute.
+This is an assembly attribute that takes one string argument with a name of assembly and forbids direct and transitive references from the specified assembly to the assembly marked with this attribute.
 Basically, this attribute is an antipode of InternalsVisibleTo attribute.
 
 ### Usage instructions
-Install ArchRoslyn.Abstractions package in order to mark assemblies with this attribute.
-Install ArchRoslyn.Analyzer into your projects to enable validation of rules imposed by an attribute.
+Install ArchRoslyn.Analyzer into *all* your projects to enable validation of rules imposed by an attribute.  
+
+Analyzer package contains both analyzer and an attribute and it's required to install analyzer in all of your projects because of Roslyn analyzer API limitations.
+Diagnostic analyzers only work on a single compilation at a time, and they can't access other compilations directly.
+That is why we have to workaround and share state between analyzer runs for different compilation.
+Also this design implies that it is possible for shared state to become incoherent in case of aggressive caching of compilation in IDE.
+Nevertheless, for a fresh run of a dotnet build this should work fine.
 
 ## List of ideas
 * Explore unit-testing lib APIs for inspiration and possible adoption as an interface for Roslyn-based rules.
