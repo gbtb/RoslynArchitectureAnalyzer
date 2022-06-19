@@ -2,12 +2,13 @@ using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using ArchRoslyn.Attributes;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
-using Roslyn.Architecture.Abstractions;
+using Microsoft.CodeAnalysis.Text;
 
-[assembly:InternalsVisibleTo("Roslyn.Architecture.Tests")]
-namespace Roslyn.Architecture.Analyzer;
+[assembly:InternalsVisibleTo("ArchRoslyn.Tests")]
+namespace ArchRoslyn.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class DependencyAnalyzer: DiagnosticAnalyzer
@@ -15,11 +16,18 @@ public class DependencyAnalyzer: DiagnosticAnalyzer
     private static readonly DiagnosticDescriptor CannotReferenceDiagnostic = new("RARCH1", "Cannot reference assembly",
         "Assembly {0} has a forbidden reference to assembly {1}. Reference chain: {2}.", "Architecture", DiagnosticSeverity.Error, true);
 
-    private ConcurrentDictionary<string, SearchContext> _forbiddenReferenceChains;
+    private static readonly SourceText _emptySource = SourceText.From("");
+    private static readonly SourceTextValueProvider<ConcurrentDictionary<string, SearchContext>> _valueProvider;
 
+    static DependencyAnalyzer()
+    {
+        _valueProvider =
+            new SourceTextValueProvider<ConcurrentDictionary<string, SearchContext>>(_ =>
+                new ConcurrentDictionary<string, SearchContext>());
+    }
+    
     public DependencyAnalyzer()
     {
-        _forbiddenReferenceChains = new ConcurrentDictionary<string, SearchContext>();
         SupportedDiagnostics = ImmutableArray.Create(CannotReferenceDiagnostic);
     }
 
@@ -28,6 +36,7 @@ public class DependencyAnalyzer: DiagnosticAnalyzer
         Debugger.Launch();
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.Analyze | GeneratedCodeAnalysisFlags.ReportDiagnostics);
         context.EnableConcurrentExecution();
+        context.TryGetValue(_emptySource, _valueProvider, out var _); //initializing shared state
 #pragma warning disable RS1013
         context.RegisterCompilationStartAction(startContext =>
 #pragma warning restore RS1013
@@ -39,15 +48,18 @@ public class DependencyAnalyzer: DiagnosticAnalyzer
 
     private void AnalyzeReferences(CompilationAnalysisContext ctx)
     {
+        if (!ctx.TryGetValue(_emptySource, _valueProvider, out var forbiddenReferenceChains))
+            throw new ApplicationException("Shared state hasn't been initialized properly");
+        
         var compilation = ctx.Compilation;
-        if (_forbiddenReferenceChains.Count > 0)
+        if (forbiddenReferenceChains.Count > 0)
         {
             var forbiddenDeps =
-                compilation.ReferencedAssemblyNames.Where(r => _forbiddenReferenceChains.ContainsKey(r.Name));
+                compilation.ReferencedAssemblyNames.Where(r => forbiddenReferenceChains.ContainsKey(r.Name));
 
             foreach (var assemblyIdentity in forbiddenDeps)
             {
-                var searchContext = _forbiddenReferenceChains[assemblyIdentity.Name];
+                var searchContext = forbiddenReferenceChains[assemblyIdentity.Name];
                 if (searchContext.ForbiddenReferrerName == compilation.AssemblyName)
                     ctx.ReportDiagnostic(Diagnostic.Create(CannotReferenceDiagnostic, Location.None, 
                         compilation.AssemblyName, searchContext.ForbiddenReferenceName,
@@ -56,16 +68,16 @@ public class DependencyAnalyzer: DiagnosticAnalyzer
                 
                 var newContext = searchContext with
                 {
-                    ReferenceChain = searchContext.ReferenceChain.Push(assemblyIdentity.Name)
+                    ReferenceChain = searchContext.ReferenceChain.Push(compilation.AssemblyName!)
                 };
-                _forbiddenReferenceChains[assemblyIdentity.Name] = newContext;
+                forbiddenReferenceChains[compilation.AssemblyName!] = newContext;
             }
         }
         
         var cannotBeReferencedAttrs = GetAssemblyAttributesFromCompilation(compilation.Assembly);
         foreach (var attributeData in cannotBeReferencedAttrs)
         {
-            if (attributeData.ConstructorArguments.IsEmpty && attributeData.ConstructorArguments[0].Value is string refName && compilation.AssemblyName is {})
+            if (!attributeData.ConstructorArguments.IsEmpty && attributeData.ConstructorArguments[0].Value is string refName && compilation.AssemblyName is {})
             {
                 var c = new SearchContext
                 {
@@ -74,7 +86,7 @@ public class DependencyAnalyzer: DiagnosticAnalyzer
                     ForbiddenReferenceName = compilation.AssemblyName
                 };
 
-                _forbiddenReferenceChains[compilation.AssemblyName] = c;
+                forbiddenReferenceChains[compilation.AssemblyName] = c;
             }
         }
     }

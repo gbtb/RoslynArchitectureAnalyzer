@@ -4,19 +4,18 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using ArchRoslyn.Analyzers;
+using ArchRoslyn.Attributes;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
 using NUnit.Framework;
-using Roslyn.Architecture.Abstractions;
-using Roslyn.Architecture.Analyzer;
 using RoslynTestKit;
-using RoslynTestKit.Utils;
 
-[assembly:CannotBeReferencedBy("111")]
 namespace Roslyn.Architecture.Tests;
 
+[Parallelizable(ParallelScope.None)]
 public class Tests: AnalyzerTestFixture
 {
     [OneTimeSetUp]
@@ -91,15 +90,19 @@ public class Tests: AnalyzerTestFixture
         workspace.WorkspaceFailed += (_, err) => Assert.Fail(err.ToString());
         Assert.That(emptyDoc.Project.Solution.Projects.First().Documents.Count(), Is.EqualTo(1), "Expected solution structure hasn't been formed");
 
-        var compilation = await libProject.GetCompilationAsync();
-        
-        compilation = await emptyDoc.Project.GetCompilationAsync();
-        var compilationWithAnalyzers = compilation?.WithAnalyzers(analyzers);
-        var diags = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
+        await RunAnalyzersOnProjectAsync(libProject, analyzers);
+        var diags = await RunAnalyzersOnProjectAsync(emptyDoc.Project, analyzers);
         
         Assert.That(diags.IsEmpty, Is.False);
         Assert.That(diags[0].Id, Is.EqualTo("RARCH1"));
         Assert.That(diags[0].GetMessage(), Is.EqualTo("Assembly Main has a forbidden reference to assembly Lib. Reference chain: Main->Lib."));
+    }
+
+    private async Task<ImmutableArray<Diagnostic>> RunAnalyzersOnProjectAsync(Project project,
+        ImmutableArray<DiagnosticAnalyzer> analyzers)
+    {
+        var compilation = await project.GetCompilationAsync();
+        return await compilation.WithAnalyzers(analyzers).GetAnalyzerDiagnosticsAsync();
     }
 
     private Project PrepareLibProject(AdhocWorkspace workspace, IEnumerable<AnalyzerReference> analyzers,
@@ -152,6 +155,7 @@ public class Tests: AnalyzerTestFixture
 
         var reference = new ProjectReference(libProject.Id);
         solution = workspace.CurrentSolution.AddProjectReference(lib2Project.Id, reference);
+        lib2Project = solution.GetProject(lib2Project.Id);
         reference = new ProjectReference(lib2Project.Id);
         solution = solution.AddProjectReference(mainProject.Id, reference);
         var emptyDoc = solution.GetProject(mainProject.Id)?.AddDocument("Empty.cs", "");
@@ -159,9 +163,10 @@ public class Tests: AnalyzerTestFixture
         workspace.WorkspaceFailed += (_, err) => Assert.Fail(err.ToString());
         Assert.That(emptyDoc.Project.Solution.Projects.First().Documents.Count(), Is.EqualTo(1), "Expected solution structure hasn't been formed");
 
-        var compilation = await emptyDoc.Project.GetCompilationAsync();
-        var compilationWithAnalyzers = compilation?.WithAnalyzers(analyzers);
-        var diags = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
+        await RunAnalyzersOnProjectAsync(libProject, analyzers);
+        await RunAnalyzersOnProjectAsync(lib2Project, analyzers);
+
+        var diags = await RunAnalyzersOnProjectAsync(emptyDoc.Project, analyzers);
         Assert.That(diags.IsEmpty, Is.False);
         Assert.That(diags[0].Id, Is.EqualTo("RARCH1"));
         Assert.That(diags[0].GetMessage(), Is.EqualTo("Assembly Main has a forbidden reference to assembly Lib. Reference chain: Main->Lib2->Lib."));
@@ -206,9 +211,10 @@ public class Tests: AnalyzerTestFixture
         workspace.WorkspaceFailed += (_, err) => Assert.Fail(err.ToString());
         Assert.That(emptyDoc.Project.Solution.Projects.First().Documents.Count(), Is.EqualTo(1), "Expected solution structure hasn't been formed");
 
-        var compilation = await emptyDoc.Project.GetCompilationAsync();
-        var compilationWithAnalyzers = compilation?.WithAnalyzers(analyzers);
-        var diags = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
+        await RunAnalyzersOnProjectAsync(lib2Project, analyzers);
+        await RunAnalyzersOnProjectAsync(libProject, analyzers);
+
+        var diags = await RunAnalyzersOnProjectAsync(emptyDoc.Project, analyzers);
         Assert.That(diags.Count, Is.EqualTo(2));
         Assert.That(diags[0].Id, Is.EqualTo("RARCH1"));
         Assert.That(diags[0].GetMessage(), Is.EqualTo("Assembly Main has a forbidden reference to assembly Lib. Reference chain: Main->Lib."));

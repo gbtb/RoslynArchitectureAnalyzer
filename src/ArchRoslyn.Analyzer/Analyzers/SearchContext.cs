@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace Roslyn.Architecture.Analyzer;
+namespace ArchRoslyn.Analyzers;
 
 public record SearchContext
 {

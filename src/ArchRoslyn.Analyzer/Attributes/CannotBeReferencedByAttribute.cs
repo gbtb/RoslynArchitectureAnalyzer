@@ -1,4 +1,4 @@
-namespace Roslyn.Architecture.Abstractions;
+namespace ArchRoslyn.Attributes;
 
 [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
 public class CannotBeReferencedByAttribute: Attribute

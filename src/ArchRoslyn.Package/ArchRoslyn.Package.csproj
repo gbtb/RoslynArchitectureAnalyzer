@@ -19,7 +19,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Roslyn.Architecture.Analyzer\Roslyn.Architecture.Analyzer.csproj" />
+        <ProjectReference Include="..\ArchRoslyn.Analyzer\ArchRoslyn.Analyzer.csproj" />
     </ItemGroup>
 
     <ItemGroup>
