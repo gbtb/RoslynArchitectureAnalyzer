@@ -32,7 +32,7 @@ public class Tests: AnalyzerTestFixture
         
         var sourceText = @"
                 using System;
-                using Roslyn.Architecture.Abstractions;
+                using ArchRoslyn.Abstractions.Attributes;
 
                 [assembly:CannotBeReferencedBy(""SomeProject.Name"")]
                 [assembly:CannotBeReferencedByAttribute(""SomeProject.Name"")]
@@ -67,7 +67,7 @@ public class Tests: AnalyzerTestFixture
 
         var sourceText = @"
                 using System;
-                using ArchRoslyn.Attributes;
+                using ArchRoslyn.Abstractions.Attributes;
 
                 [assembly:CannotBeReferencedBy(""Main"")]
                 namespace Lib 
@@ -136,7 +136,7 @@ public class Tests: AnalyzerTestFixture
 
         var sourceText = @"
                 using System;
-                using ArchRoslyn.Attributes;
+                using ArchRoslyn.Abstractions.Attributes;
 
                 [assembly:CannotBeReferencedBy(""Main"")]
                 namespace Lib 
@@ -183,7 +183,7 @@ public class Tests: AnalyzerTestFixture
 
         var sourceText = @"
                 using System;
-                using ArchRoslyn.Attributes;
+                using ArchRoslyn.Abstractions.Attributes;
 
                 [assembly:CannotBeReferencedBy(""Main"")]
                 namespace Lib 
@@ -220,7 +220,7 @@ public class Tests: AnalyzerTestFixture
         
         var sourceText2 = @"
                 using System;
-                using ArchRoslyn.Attributes;
+                using ArchRoslyn.Abstractions.Attributes;
 
                 namespace Lib 
                 {
@@ -254,7 +254,7 @@ public class Tests: AnalyzerTestFixture
 
         var sourceText = @"
                 using System;
-                using ArchRoslyn.Attributes;
+                using ArchRoslyn.Abstractions.Attributes;
 
                 [assembly:CannotBeReferencedBy(""Main"")]
                 namespace Lib 
@@ -333,7 +333,7 @@ public class Tests: AnalyzerTestFixture
     private static IEnumerable<TestCaseData> MultipleAttributesWithDifferentOrder() {
         yield return  new TestCaseData(@"
                 using System;
-                using ArchRoslyn.Attributes;
+                using ArchRoslyn.Abstractions.Attributes;
 
                 [assembly:CannotBeReferencedBy(""Lib2"")]
                 [assembly:CannotBeReferencedBy(""Main"")]
@@ -348,7 +348,7 @@ public class Tests: AnalyzerTestFixture
         
         yield return  new TestCaseData(@"
                 using System;
-                using ArchRoslyn.Attributes;
+                using ArchRoslyn.Abstractions.Attributes;
 
                 [assembly:CannotBeReferencedBy(""Main"")]
                 [assembly:CannotBeReferencedBy(""Lib2"")]
