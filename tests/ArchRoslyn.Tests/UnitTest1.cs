@@ -1,11 +1,10 @@
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using ArchRoslyn.Abstractions.Attributes;
 using ArchRoslyn.Analyzers;
-using ArchRoslyn.Attributes;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;

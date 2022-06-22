@@ -1,4 +1,4 @@
-﻿using ArchRoslyn.Attributes;
+﻿using ArchRoslyn.Abstractions.Attributes;
 
 //[assembly: CannotBeReferencedBy("ClassLibrary2")]
 namespace ClassLibrary1;
