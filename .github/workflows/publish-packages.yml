@@ -53,10 +53,10 @@ jobs:
         run: dotnet build -c Release
       - name: Pack roslyn analyzer
         working-directory: src/ArchRoslyn.Package
-        run: dotnet paket pack ../nupkgs
+        run: dotnet paket pack ../nupkg
       - name: Pack attributes package
         working-directory: src/ArchRoslyn.Abstractions
-        run: dotnet paket pack ../nupkgs
+        run: dotnet paket pack ../nupkg
   store-artifacts:
     needs: create-packages
     runs-on: self-hosted
