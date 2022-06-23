@@ -5,15 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <RootNamespace>ArchRoslyn.Abstractions</RootNamespace>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <LangVersion>10</LangVersion>
     </PropertyGroup>
 
-    <PropertyGroup>
-        <Description>
-            Roslyn analyzers for architecture validation
-        </Description>
-        <PackageId>ArchRoslyn.Abstractions</PackageId>
-    </PropertyGroup>
-    
 </Project>
