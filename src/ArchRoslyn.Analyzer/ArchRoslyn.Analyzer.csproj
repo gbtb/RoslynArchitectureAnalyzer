@@ -6,31 +6,11 @@
     <Nullable>enable</Nullable>
     <LangVersion>10</LangVersion>
     <RootNamespace>ArchRoslyn</RootNamespace>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
   
   <ItemGroup>
     <ProjectReference Include="..\ArchRoslyn.Abstractions\ArchRoslyn.Abstractions.csproj" />
   </ItemGroup>
-
-  <PropertyGroup>
-    <Description>
-      Roslyn analyzers for architecture validation
-    </Description>
-    <PackageId>ArchRoslyn.Analyzers</PackageId>
-    <NoPackageAnalysis>true</NoPackageAnalysis>
-    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddAnalyzersToOutput</TargetsForTfmSpecificContentInPackage>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <None Update="tools\*.ps1" CopyToOutputDirectory="Always" Pack="true" PackagePath="" />
-  </ItemGroup>
-
-  <Target Name="_AddAnalyzersToOutput">
-    <ItemGroup>
-      <TfmSpecificPackageFile Include="$(OutputPath)\ArchRoslyn.Analyzer.dll" PackagePath="analyzers/dotnet/cs" />
-    </ItemGroup>
-  </Target>
   
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>
