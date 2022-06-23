@@ -1,0 +1,13 @@
+type project
+id ArchRoslyn.Abstractions
+version 0.3.0
+authors gbtb
+description Roslyn analyzers for architecture validation (Abstractions and attributes)
+licenseExpression MIT
+readme README.md
+projectUrl https://github.com/gbtb/RoslynArchitectureAnalyzer
+repositoryUrl https://github.com/gbtb/RoslynArchitectureAnalyzer
+tags roslyn analyzer architecture references
+developmentDependency false
+files
+    ../../README.md ==> .

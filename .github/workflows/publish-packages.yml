@@ -13,7 +13,7 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
-  restore:
+  create-packages:
     container: 
       image: mcr.microsoft.com/dotnet/sdk:6.0
       options: --user ${{ needs.configure.outputs.uid_gid }} -e COMPlus_EnableDiagnostics=0
@@ -45,14 +45,20 @@ jobs:
             curl -Os https://uploader.codecov.io/v0.1.17/linux/codecov
             chmod +x codecov
             ./codecov -f coverage.opencover.xml
+      - name: Build roslyn analyzer
+        working-directory: src/ArchRoslyn.Package
+        run: dotnet build -c Release
+      - name: Build attributes package
+        working-directory: src/ArchRoslyn.Abstractions
+        run: dotnet build -c Release
       - name: Pack roslyn analyzer
         working-directory: src/ArchRoslyn.Package
-        run: dotnet build -c release
-#      - name: Pack attributes package
-#        working-directory: src/Roslyn.Architecture.Abstractions
-#        run: dotnet build -c release
+        run: dotnet paket pack ../nupkgs
+      - name: Pack attributes package
+        working-directory: src/ArchRoslyn.Abstractions
+        run: dotnet paket pack ../nupkgs
   store-artifacts:
-    needs: restore
+    needs: create-packages
     runs-on: self-hosted
     steps:
       - name: Store packages

@@ -1,0 +1,21 @@
+type file
+id ArchRoslyn.Analyzers
+version 0.3.0
+authors gbtb
+description Roslyn analyzers for architecture validation
+licenseExpression MIT
+include-referenced-projects true
+readme README.md
+projectUrl https://github.com/gbtb/RoslynArchitectureAnalyzer
+repositoryUrl https://github.com/gbtb/RoslynArchitectureAnalyzer
+tags roslyn analyzer architecture references
+developmentDependency false
+
+files
+    tools ==> /tools
+    ./bin/Release/netstandard2.0/ArchRoslyn.Analyzer.dll ==> /analyzers/dotnet/cs/
+    ../../README.md ==> .
+dependencies
+      ArchRoslyn.Abstractions 0.3.0
+excludeddependencies
+  Microsoft.CodeAnalysis.CSharp.Workspaces 

@@ -7,8 +7,10 @@
     <LangVersion>10</LangVersion>
     <RootNamespace>ArchRoslyn</RootNamespace>
   </PropertyGroup>
+  
   <ItemGroup>
     <ProjectReference Include="..\ArchRoslyn.Abstractions\ArchRoslyn.Abstractions.csproj" />
   </ItemGroup>
+  
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>
