@@ -58,7 +58,7 @@ jobs:
         working-directory: src/ArchRoslyn.Abstractions
         run: dotnet paket pack ../nupkgs
   store-artifacts:
-    needs: restore
+    needs: create-packages
     runs-on: self-hosted
     steps:
       - name: Store packages
