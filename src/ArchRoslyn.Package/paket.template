@@ -13,7 +13,8 @@ developmentDependency false
 
 files
     tools ==> /tools
-    ./bin/Release/netstandard2.0/ArchRoslyn.Analyzer.dll ==> /analyzers/dotnet/cs/
+    #omfg, case sensitivity strikes again
+    ./bin/*elease/netstandard2.0/ArchRoslyn.Analyzer.dll ==> /analyzers/dotnet/cs/
     ../../README.md ==> .
 dependencies
       ArchRoslyn.Abstractions 0.3.0
