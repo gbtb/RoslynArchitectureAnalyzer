@@ -48,9 +48,9 @@ jobs:
       - name: Pack roslyn analyzer
         working-directory: src/ArchRoslyn.Package
         run: dotnet build -c release
-#      - name: Pack attributes package
-#        working-directory: src/Roslyn.Architecture.Abstractions
-#        run: dotnet build -c release
+      - name: Pack attributes package
+        working-directory: src/ArchRoslyn.Abstractions
+        run: dotnet build -c release
   store-artifacts:
     needs: restore
     runs-on: self-hosted

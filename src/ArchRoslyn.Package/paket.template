@@ -1,0 +1,10 @@
+type file
+authors gbtb
+description Roslyn analyzers for architecture validation
+version 0.3.0
+id ArchRoslyn.Analyzers
+licenseExpression MIT
+include-referenced-projects true
+files
+    tools ==> /tools
+    ./bin/Release/netstandard2.0/ArchRoslyn.Analyzer.dll ==> /analyzers/dotnet/cs/

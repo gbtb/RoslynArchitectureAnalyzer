@@ -3,18 +3,17 @@
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
         <IncludeBuildOutput>true</IncludeBuildOutput>
-        <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <RootNamespace>Roslyn.Architecture.Package</RootNamespace>
+        <SuppressDependenciesWhenPacking>false</SuppressDependenciesWhenPacking>
+<!--        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>-->
     </PropertyGroup>
         
     <PropertyGroup>
         <Description>
             Roslyn analyzers for architecture validation
         </Description>
-        <PackageId>ArchRoslyn.Analyzers</PackageId>
+        <PackageId>ArchRoslyn.Analyzersrr</PackageId>
         <NoPackageAnalysis>true</NoPackageAnalysis>
-        <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddAnalyzersToOutput</TargetsForTfmSpecificContentInPackage>
+<!--        <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddAnalyzersToOutput</TargetsForTfmSpecificContentInPackage>-->
     </PropertyGroup>
 
     <ItemGroup>
@@ -26,10 +25,10 @@
         <None Update="tools\*.ps1" CopyToOutputDirectory="Always" Pack="true" PackagePath="" />
     </ItemGroup>
 
-    <Target Name="_AddAnalyzersToOutput">
-        <ItemGroup>
-            <TfmSpecificPackageFile Include="$(OutputPath)\ArchRoslyn.Analyzer.dll" PackagePath="analyzers/dotnet/cs" />
-        </ItemGroup>
-    </Target>
+<!--    <Target Name="_AddAnalyzersToOutput">-->
+<!--        <ItemGroup>-->
+<!--            <TfmSpecificPackageFile Include="$(OutputPath)\ArchRoslyn.Analyzer.dll" PackagePath="analyzers/dotnet/cs" />-->
+<!--        </ItemGroup>-->
+<!--    </Target>-->
 
 </Project>
