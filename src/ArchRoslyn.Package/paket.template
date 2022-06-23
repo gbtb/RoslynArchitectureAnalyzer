@@ -4,6 +4,7 @@ version 0.3.0
 authors gbtb
 description Roslyn analyzers for architecture validation
 licenseExpression MIT
+licenseUrl https://licenses.nuget.org/MIT
 include-referenced-projects true
 readme README.md
 projectUrl https://github.com/gbtb/RoslynArchitectureAnalyzer
