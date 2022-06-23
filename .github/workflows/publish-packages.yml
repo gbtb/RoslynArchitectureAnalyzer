@@ -47,10 +47,10 @@ jobs:
             ./codecov -f coverage.opencover.xml
       - name: Build roslyn analyzer
         working-directory: src/ArchRoslyn.Package
-        run: dotnet build -c release
+        run: dotnet build -c Release
       - name: Build attributes package
         working-directory: src/ArchRoslyn.Abstractions
-        run: dotnet build -c release
+        run: dotnet build -c Release
       - name: Pack roslyn analyzer
         working-directory: src/ArchRoslyn.Package
         run: dotnet paket pack ../nupkgs
