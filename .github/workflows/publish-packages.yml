@@ -90,4 +90,4 @@ jobs:
           NUGET_FEED_URL: ${{ secrets.NUGET_FEED_URL }}
           NUGET_KEY: ${{ secrets.NUGET_KEY }}
         working-directory: src/nupkg
-        run: dotnet paket push --url "$NUGET_FEED_URL" --api-key="$NUGET_KEY" *.nupkg
+        run: dotnet paket push *.nupkg --url "$NUGET_FEED_URL" --api-key "$NUGET_KEY" 
