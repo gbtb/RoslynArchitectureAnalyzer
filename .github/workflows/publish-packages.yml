@@ -90,6 +90,7 @@ jobs:
           NUGET_FEED_URL: ${{ secrets.NUGET_FEED_URL }}
           NUGET_KEY: ${{ secrets.NUGET_KEY }}
         working-directory: src/nupkg
+        shell: bash
         run: |
           # Read the main string
           text=`ls *.nupkg`
