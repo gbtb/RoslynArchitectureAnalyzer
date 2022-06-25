@@ -92,16 +92,7 @@ jobs:
         working-directory: src/nupkg
         shell: bash
         run: |
-          # Read the main string
-          text=`ls *.nupkg`
-
-          # Split the string by space
-          readarray -d " " -t strarr <<< "$text"
-
-          # Print each value of the array by 
-          # using loop
-          for (( n=0; n < ${#strarr[*]}; n++))
-          do
-            dotnet paket push --url "$NUGET_FEED_URL" --api-key "$NUGET_KEY" "${strarr[n]}"
+          ls *.nupkg | while read line;
+            do dotnet paket push --url "$NUGET_FEED_URL" --api-key "$NUGET_KEY" "$line" 
           done
           
