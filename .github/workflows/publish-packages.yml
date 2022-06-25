@@ -82,10 +82,9 @@ jobs:
       image: mcr.microsoft.com/dotnet/sdk:6.0
       options: --user ${{ needs.configure.outputs.uid_gid }} -e COMPlus_EnableDiagnostics=0
     steps:
-      #- name: Prepare packages
-      #  uses: actions/download-artifact@v3
-      #  with:
-      #    name: nuget_packages
+      - name: Install paket & coverlet
+        run: dotnet tool restore
+        working-directory: .
       - name: Push packages
         env: # Or as an environment variable
           NUGET_FEED_URL: ${{ secrets.NUGET_FEED_URL }}
