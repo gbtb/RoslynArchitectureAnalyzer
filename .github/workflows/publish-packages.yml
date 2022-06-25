@@ -90,4 +90,17 @@ jobs:
           NUGET_FEED_URL: ${{ secrets.NUGET_FEED_URL }}
           NUGET_KEY: ${{ secrets.NUGET_KEY }}
         working-directory: src/nupkg
-        run: dotnet paket push --url "$NUGET_FEED_URL" --api-key "$NUGET_KEY" .
+        run: |
+          # Read the main string
+          text=`ls *.nupkg`
+
+          # Split the string by space
+          readarray -d " " -t strarr <<< "$text"
+
+          # Print each value of the array by 
+          # using loop
+          for (( n=0; n < ${#strarr[*]}; n++))
+          do
+            dotnet paket push --url "$NUGET_FEED_URL" --api-key "$NUGET_KEY" "${strarr[n]}"
+          done
+          
