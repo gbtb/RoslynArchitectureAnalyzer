@@ -93,6 +93,6 @@ jobs:
         shell: bash
         run: |
           ls *.nupkg | while read line;
-            do dotnet paket push --api-key "$NUGET_KEY" "$line" 
+            do dotnet paket push --ignoreConflicts --api-key "$NUGET_KEY" "$line" 
           done
           
