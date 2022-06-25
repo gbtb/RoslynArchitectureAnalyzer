@@ -13,7 +13,7 @@ tags roslyn analyzer architecture references
 developmentDependency false
 
 files
-    tools ==> /tools
+    #tools ==> /tools
     ./bin/Release/netstandard2.0/ArchRoslyn.Analyzer.dll ==> /analyzers/dotnet/cs/
     ../../README.md ==> .
 dependencies
