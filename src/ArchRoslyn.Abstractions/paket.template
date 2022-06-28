@@ -1,6 +1,6 @@
 type project
 id ArchRoslyn.Abstractions
-version 0.3.0
+version 0.4.0
 authors gbtb
 description Roslyn analyzers for architecture validation (Abstractions and attributes)
 licenseExpression MIT

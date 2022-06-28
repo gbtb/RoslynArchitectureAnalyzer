@@ -1,6 +1,6 @@
 type file
 id ArchRoslyn.Analyzers
-version 0.3.0
+version 0.4.0
 authors gbtb
 description Roslyn analyzers for architecture validation
 licenseExpression MIT
@@ -13,10 +13,10 @@ tags roslyn analyzer architecture references
 developmentDependency false
 
 files
-    #tools ==> /tools
-    ./bin/Release/netstandard2.0/ArchRoslyn.Analyzer.dll ==> /analyzers/dotnet/cs/
+    tools ==> tools/
+    ./bin/Release/netstandard2.0/ArchRoslyn.Analyzer.dll ==> analyzers/dotnet/cs/
     ../../README.md ==> .
 dependencies
-      ArchRoslyn.Abstractions 0.3.0
+      ArchRoslyn.Abstractions 0.4.0
 excludeddependencies
   Microsoft.CodeAnalysis.CSharp.Workspaces 
